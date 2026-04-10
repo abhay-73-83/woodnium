@@ -31,7 +31,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     ProfileTab(),
   ];
 
-  String _appBarTitle = 'Carpenter';
+  String _appBarTitle = 'WoodNium';
 
   @override
   void initState() {
@@ -57,14 +57,14 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     await EnquiryService.init();
     
     SharedPreferences sp = await SharedPreferences.getInstance();
-    String username = sp.getString("name") ?? "Carpenter";
+    String username = sp.getString("name") ?? "WoodNium";
 
     if (mounted) {
       setState(() {
-        if (username != 'Carpenter' && username.isNotEmpty) {
+        if (username != 'WoodNium' && username.isNotEmpty) {
           _appBarTitle = 'Hello, $username...';
         } else {
-          _appBarTitle = 'Carpenter';
+          _appBarTitle = 'WoodNium';
         }
       });
     }

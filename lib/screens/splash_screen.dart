@@ -66,12 +66,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Carpenter tools icon
+                // WoodNium tools icon
                 Image.asset("assets/logo.png", height: 250, width: 250)
                 ,
                 const SizedBox(height: 24),
                 const Text(
-                  'Carpenter',
+                  'WoodNium',
                   style: TextStyle(
                     fontSize: 42,
                     fontWeight: FontWeight.bold,

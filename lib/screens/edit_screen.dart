@@ -53,7 +53,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadName() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
-    String username = sp.getString("name") ?? "Carpenter";
+    String username = sp.getString("name") ?? "WoodNium";
     if (mounted) {
       setState(() {
         _currentName = username;

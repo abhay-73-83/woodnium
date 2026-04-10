@@ -130,4 +130,25 @@ class ApiService {
       return 0;
     }
   }
+
+  // ---------------- CATEGORIES ----------------
+  Future<List<dynamic>> getCategories() async {
+    try {
+      var resp = await http.get(
+        Uri.parse('http://localhost/woodniumapi/c_categories_view.php'),
+      );
+
+      print("Category Status Code: ${resp.statusCode}");
+      print("Category Response: ${resp.body}");
+
+      if (resp.statusCode == 200) {
+        return json.decode(resp.body);
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print("Category Error: $e");
+      return [];
+    }
+  }
 }

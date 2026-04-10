@@ -11,7 +11,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Carpenter'),
+        title: const Text('WoodNium'),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none_rounded),
