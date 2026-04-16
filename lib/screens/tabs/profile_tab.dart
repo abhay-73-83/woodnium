@@ -203,11 +203,18 @@ class _ProfileTabState extends State<ProfileTab> {
           ),
           child: Column(
             children: [
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 40,
                 backgroundColor: AppColors.background,
                 child:
-                Icon(Icons.person, size: 40, color: AppColors.primary),
+                Text(
+                  _name.isNotEmpty ? _name[0].toUpperCase() : "W",
+                  style: const TextStyle(
+                    fontSize: 40,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
 
