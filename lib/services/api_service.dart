@@ -135,7 +135,7 @@ class ApiService {
   Future<List<dynamic>> getCategories() async {
     try {
       var resp = await http.get(
-        Uri.parse('http://localhost/woodniumapi/c_categories_view.php'),
+        Uri.parse('https://www.prakrutitech.xyz/abhay/c_categories_view.php'),
       );
 
       print("Category Status Code: ${resp.statusCode}");
@@ -148,6 +148,27 @@ class ApiService {
       }
     } catch (e) {
       print("Category Error: $e");
+      return [];
+    }
+  }
+
+  // ---------------- PRODUCTS ----------------
+  Future<List<dynamic>> getProducts() async {
+    try {
+      var resp = await http.get(
+        Uri.parse('https://www.prakrutitech.xyz/abhay/c_product_view.php'),
+      );
+
+      print("Product Status Code: ${resp.statusCode}");
+      print("Product Response: ${resp.body}");
+
+      if (resp.statusCode == 200) {
+        return json.decode(resp.body);
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print("Product Error: $e");
       return [];
     }
   }

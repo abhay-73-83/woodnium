@@ -56,6 +56,7 @@ class _CategoriesTabState extends State<CategoriesTab> {
           return CategoryItem(
             icon: Icons.category,
             name: item['name']?.toString() ?? "",
+            image: item['image']?.toString(),
             onTap: () {
               Navigator.push(
                 context,

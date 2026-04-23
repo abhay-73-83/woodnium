@@ -1,16 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../../utils/app_colors.dart';
-import '../../widgets/product_card.dart';
-import '../../services/wishlist_service.dart';
-import '../../services/enquiry_service.dart';
-import '../bottom_nav_screen.dart';
+import '../../services/api_service.dart';
 
-class HomeTab extends StatelessWidget {
+class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
 
   @override
+  State<HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends State<HomeTab> {
+  List products = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchProducts();
+  }
+
+  Future<void> fetchProducts() async {
+    var data = await ApiService().getProducts();
+
+    if (mounted) {
+      setState(() {
+        products = data;
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (products.isEmpty) {
+      return const Center(child: Text("No Products Found"));
+    }
+
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 16),
       children: [
@@ -114,85 +144,151 @@ class HomeTab extends StatelessWidget {
       }).toList(),
     );
   }
-}
 
   Widget _buildFeaturedProducts(BuildContext context) {
-    final products = [
-      {
-        'id': 'featured_1',
-        'name': 'Modern Oak Chair',
-        'price': '₹120',
-        'image': 'https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&w=400&q=80',
-      },
-      {
-        'id': 'featured_2',
-        'name': 'Classic Wood Table',
-        'price': '₹350',
-        'image': 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?auto=format&fit=crop&w=400&q=80',
-      },
-      {
-        'id': 'featured_3',
-        'name': 'Leather Sofa set',
-        'price': '₹890',
-        'image': 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=400&q=80',
-      },
-      {
-        'id': 'featured_4',
-        'name': 'King Size Bed',
-        'price': '₹550',
-        'image': 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=400&q=80',
-      },
-    ];
+    String baseImageUrl = "https://www.prakrutitech.xyz/abhay/uploads/";
+    return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: products.length,
+      itemBuilder: (context, index) {
+        var item = products[index];
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: ValueListenableBuilder<List<Map<String, dynamic>>>(
-        valueListenable: WishlistService.wishlistNotifier,
-        builder: (context, wishlist, _) {
-          return GridView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 0.65,
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(8),
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: (item["image"] == null || item["image"] == "")
+                ? const Icon(Icons.image, size: 80)
+                : Image.network(
+                    baseImageUrl + (item["image"]?.toString() ?? ""),
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.broken_image);
+                    },
+                  ),
             ),
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              final product = products[index];
-              final isWishlisted = WishlistService.isInWishlist(product['id']!);
-              return ProductCard(
-                image: product['image']!,
-                title: product['name']!,
-                price: product['price']!,
-                isWishlisted: isWishlisted,
-                onWishlistTap: () {
-                  if (isWishlisted) {
-                    WishlistService.removeFromWishlist(product['id']!);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Removed from Wishlist')),
-                    );
-                  } else {
-                    WishlistService.addToWishlist(product);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Added to Wishlist')),
-                    );
-                  }
-                },
-                onEnquiryTap: () async {
-                  await Future.delayed(const Duration(milliseconds: 600));
-                  await EnquiryService.addEnquiry(product);
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Enquiry Added Successfully', style: TextStyle(color: Colors.white)), backgroundColor: AppColors.success),
-                  );
-                  BottomNavScreen.tabNotifier.value = 3;
-                },
+            title: Text(
+              item["name"]?.toString() ?? "",
+              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+            ),
+            subtitle: Text(
+              "₹ ${item["price"]}",
+              style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProductDetailsScreen(product: item),
+                ),
               );
             },
-          );
-        },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class ProductDetailsScreen extends StatelessWidget {
+  final Map product;
+
+  const ProductDetailsScreen({super.key, required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    String baseImageUrl = "https://www.prakrutitech.xyz/abhay/uploads/";
+    
+    if (product["image"] != null) {
+      print("Image URL: " + baseImageUrl + (product["image"]?.toString() ?? ""));
+    }
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: Text(product["name"]?.toString() ?? "Product Details"),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (product["image"] != null && product["image"].toString().isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.network(
+                  baseImageUrl + product["image"].toString(),
+                  width: double.infinity,
+                  height: 250,
+                  fit: BoxFit.cover,
+                  errorBuilder: (ctx, err, stack) => const SizedBox(
+                    height: 250,
+                    child: Center(child: Icon(Icons.broken_image, size: 50)),
+                  ),
+                ),
+              ),
+            const SizedBox(height: 24),
+            Text(
+              product["name"]?.toString() ?? "",
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              "Price: ₹ ${product["price"]}",
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.accent.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                "Category: ${product["category_name"] ?? ""}",
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.accent,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              "Description",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              product["description"]?.toString() ?? "",
+              style: const TextStyle(
+                fontSize: 16,
+                height: 1.5,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}

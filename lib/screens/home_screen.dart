@@ -3,8 +3,36 @@ import 'package:carousel_slider/carousel_slider.dart';
 import '../utils/app_colors.dart';
 import '../widgets/drawer_widget.dart';
 
-class HomeScreen extends StatelessWidget {
+import '../services/api_service.dart';
+import 'tabs/home_tab.dart'; // To access ProductDetailsScreen
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  List products = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchProducts();
+  }
+
+  Future<void> fetchProducts() async {
+    var data = await ApiService().getProducts();
+
+    if (mounted) {
+      setState(() {
+        products = data;
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,24 +52,28 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       drawer: const DrawerWidget(),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
-            _buildBannerCarousel(),
-            const SizedBox(height: 24),
-            _buildSectionTitle('Categories'),
-            const SizedBox(height: 16),
-            _buildCategories(),
-            const SizedBox(height: 24),
-            _buildSectionTitle('Featured Products'),
-            const SizedBox(height: 16),
-            _buildFeaturedProducts(),
-            const SizedBox(height: 32),
-          ],
-        ),
-      ),
+      body: isLoading 
+        ? const Center(child: CircularProgressIndicator())
+        : (products.isEmpty 
+            ? const Center(child: Text("No Products Found"))
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 16),
+                    _buildBannerCarousel(),
+                    const SizedBox(height: 24),
+                    _buildSectionTitle('Categories'),
+                    const SizedBox(height: 16),
+                    _buildCategories(),
+                    const SizedBox(height: 24),
+                    _buildSectionTitle('Featured Products'),
+                    const SizedBox(height: 16),
+                    _buildFeaturedProducts(),
+                    const SizedBox(height: 32),
+                  ],
+                ),
+              )),
     );
   }
 
@@ -185,144 +217,48 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildFeaturedProducts() {
-    final products = [
-      {
-        'name': 'Modern Oak Chair',
-        'price': '\$120',
-        'image': 'https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&w=400&q=80',
-      },
-      {
-        'name': 'Classic Wood Table',
-        'price': '\$350',
-        'image': 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?auto=format&fit=crop&w=400&q=80',
-      },
-      {
-        'name': 'Leather Sofa set',
-        'price': '\$890',
-        'image': 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=400&q=80',
-      },
-      {
-        'name': 'King Size Bed',
-        'price': '\$550',
-        'image': 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=400&q=80',
-      },
-    ];
+    return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: products.length,
+      itemBuilder: (context, index) {
+        var item = products[index];
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: GridView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-          childAspectRatio: 0.65,
-        ),
-        itemCount: products.length,
-        itemBuilder: (context, index) {
-          final product = products[index];
-          return Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.08),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
-                ),
-              ],
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(8),
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                item["image"]?.toString() ?? "",
+                width: 60,
+                height: 60,
+                fit: BoxFit.cover,
+                errorBuilder: (ctx, err, stack) => const Icon(Icons.image_not_supported_outlined, size: 60),
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Image and Wishlist Icon
-                Expanded(
-                  child: Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                          image: DecorationImage(
-                            image: NetworkImage(product['image']!),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.favorite_border_rounded,
-                            size: 20,
-                            color: AppColors.accent,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Details
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                     crossAxisAlignment: CrossAxisAlignment.start,
-                     children: [
-                      Text(
-                        product['name']!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        product['price']!,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Enquiry sent for ${product['name']}')),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.secondary,
-                            foregroundColor: AppColors.textPrimary,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text('Enquiry Now'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            title: Text(
+              item["name"]?.toString() ?? "",
+              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
             ),
-          );
-        },
-      ),
+            subtitle: Text(
+              "₹ ${item["price"]}",
+              style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProductDetailsScreen(product: item),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
