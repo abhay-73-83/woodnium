@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/app_colors.dart';
-import '../../services/api_service.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
   final Map product;
@@ -11,7 +9,6 @@ class ProductDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isWishlisted = initialWishlisted;
     String baseImageUrl = "https://www.prakrutitech.xyz/abhay/uploads/";
     
     String finalImageUrl = "";
@@ -68,22 +65,6 @@ class ProductDetailsScreen extends StatelessWidget {
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
                 color: AppColors.primary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.accent.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                "Category: ${product["category_name"] ?? ""}",
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.accent,
-                ),
               ),
             ),
             const SizedBox(height: 24),
