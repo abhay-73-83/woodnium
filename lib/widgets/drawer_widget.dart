@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
 import '../services/storage_service.dart';
 import '../screens/placeholder_screen.dart';
-import '../screens/login_screen.dart';
+import '../screens/auth/login_screen.dart';
 
 class DrawerWidget extends StatefulWidget {
   const DrawerWidget({super.key});

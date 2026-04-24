@@ -4,17 +4,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/api_service.dart';
 import '../../services/connectivity_service.dart';
 import '../no_internet_screen.dart';
-import '../login_screen.dart';
-import '../edit_screen.dart';
+import '../auth/login_screen.dart';
+import 'edit_profile_screen.dart';
 
-class ProfileTab extends StatefulWidget {
-  const ProfileTab({super.key});
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
 
   @override
-  State<ProfileTab> createState() => _ProfileTabState();
+  State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileTabState extends State<ProfileTab> {
+class _ProfileScreenState extends State<ProfileScreen> {
   String _name = 'Guest User';
   String _email = '';
   String _phone = '';
@@ -159,7 +159,7 @@ class _ProfileTabState extends State<ProfileTab> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ProfileScreen(
+        builder: (_) => EditProfileScreen(
           initialName: _name,
           initialEmail: _email,
           initialPhone: _phone,

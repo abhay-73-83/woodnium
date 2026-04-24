@@ -1,44 +1,38 @@
 import 'package:flutter/material.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-import '../services/api_service.dart';
-import '../services/connectivity_service.dart';
-import '../utils/app_colors.dart';
-import '../widgets/custom_button.dart';
-import '../widgets/custom_text_field.dart';
-import 'login_screen.dart';
-import 'no_internet_screen.dart';
+import '../../utils/app_colors.dart';
+import '../../widgets/custom_text_field.dart';
+import '../../widgets/custom_button.dart';
+import '../../services/api_service.dart';
+import '../../services/connectivity_service.dart';
+import 'signup_screen.dart';
+import '../no_internet_screen.dart';
+import '../bottom_nav_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-
-  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
-
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _nameController.dispose();
     _emailController.dispose();
-    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  Future<void> Adddata() async {
+  void checkdata() async {
     if (!_formKey.currentState!.validate()) return;
 
     final hasInternet = await ConnectivityService().checkConnection();
-
     if (!mounted) return;
 
     if (!hasInternet) {
@@ -48,7 +42,7 @@ class _SignupScreenState extends State<SignupScreen> {
           builder: (_) => NoInternetScreen(
             onRetry: () {
               Navigator.pop(context);
-              Adddata();
+              checkdata();
             },
           ),
         ),
@@ -59,51 +53,45 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _isLoading = true);
 
     try {
-      var res = await ApiService().signupUser(
-        _nameController.text.trim(),
+      var user = await ApiService().signinUser(
         _emailController.text.trim(),
-        _phoneController.text.trim(),
         _passwordController.text.trim(),
       );
 
       setState(() => _isLoading = false);
-
       if (!mounted) return;
 
-      if (res == 1) {
-        // Save user data
-        // SharedPreferences sp = await SharedPreferences.getInstance();
-        // await sp.setString("name", _nameController.text.trim());
-        // await sp.setString("email", _emailController.text.trim());
-        // await sp.setString("phone", _phoneController.text.trim());
-        // await sp.setString("password", _passwordController.text.toString());
-        // await sp.setBool("isLogin", false);
+      if (user != null) {
+        SharedPreferences sp = await SharedPreferences.getInstance();
+        sp.setString("id", user["id"].toString());
+        sp.setString("name", user["name"]);
+        sp.setString("email", user["email"]);
+        sp.setString("phone", user["phone"]);
+        sp.setString("password", user["password"]);
+        sp.setBool("isLoggedIn", true);
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Signup Success'),
+            content: Text("Login Success"),
             backgroundColor: AppColors.success,
           ),
         );
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          MaterialPageRoute(builder: (context) => const BottomNavScreen()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Signup Failed'),
+            content: Text('Login Failed'),
             backgroundColor: AppColors.error,
           ),
         );
       }
     } catch (e) {
       setState(() => _isLoading = false);
-
       if (!mounted) return;
-
-      print('Signup Error: $e');
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -117,14 +105,14 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          padding: const EdgeInsets.all(24.0),
           child: Form(
             key: _formKey,
             child: Column(
               children: [
+                const SizedBox(height: 40),
                 Container(
                   width: 200,
                   height: 200,
@@ -136,35 +124,29 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: Image.asset("assets/logo.png"),
                 ),
 
+                const SizedBox(height: 32),
+
                 const Text(
-                  'Create Account',
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                  'Welcome Back',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                 ),
 
                 const SizedBox(height: 40),
 
                 CustomTextField(
-                  controller: _nameController,
-                  hintText: 'Full Name',
-                  prefixIcon: Icons.person_outline,
-                  validator: (v) =>
-                      v == null || v.isEmpty ? 'Enter name' : null,
-                ),
-
-                const SizedBox(height: 20),
-
-                CustomTextField(
                   controller: _emailController,
                   hintText: 'Email',
                   keyboardType: TextInputType.emailAddress,
-                  prefixIcon: Icons.email_outlined,
+                  prefixIcon: Icons.email,
                   validator: (value) {
                     final RegExp emailRegex = RegExp(
                       r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                     );
                     if (value == null) {
-                      return 'Enter a  email address';
-                    } else if (!emailRegex.hasMatch(value)) {
+                      return 'Enter a email address';
+                    }
+                    else if(!emailRegex.hasMatch(value))
+                    {
                       return 'Enter a valid email address';
                     }
                     return null; // Input is valid
@@ -174,43 +156,18 @@ class _SignupScreenState extends State<SignupScreen> {
                 const SizedBox(height: 20),
 
                 CustomTextField(
-                  controller: _phoneController,
-                  hintText: 'Phone',
-                  keyboardType: TextInputType.phone,
-                  prefixIcon: Icons.phone_outlined,
-                  validator: (value) {
-                    final RegExp phoneRegex = RegExp(
-                      r'^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$',
-                    );
-                    if (value == null) {
-                      return 'Enter a phone number';
-                    } else if (!phoneRegex.hasMatch(value)) {
-                      return 'Enter a valid phone number';
-                    }
-                    return null; // Input is valid
-                  },
-                ),
-
-                const SizedBox(height: 20),
-
-                CustomTextField(
                   controller: _passwordController,
-                  // obscureText: _isObscure,
                   hintText: 'Password',
-                  prefixIcon: Icons.lock_outline,
+                  prefixIcon: Icons.lock,
                   isPassword: true,
-                  validator: (v) {
-                    if (v == null || v.isEmpty) return 'Enter password';
-                    if (v.length < 6) return 'Min 6 chars';
-                    return null;
-                  },
+                  validator: (v) => v!.isEmpty ? 'Enter password' : null,
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 30),
 
                 CustomButton(
-                  text: 'REGISTER',
-                  onPressed: Adddata,
+                  text: 'LOGIN',
+                  onPressed: checkdata,
                   isLoading: _isLoading,
                 ),
 
@@ -218,17 +175,18 @@ class _SignupScreenState extends State<SignupScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Already have an account?"),
+                    const Text("Don't have an account?"),
+
                     TextButton(
                       onPressed: () {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const LoginScreen(),
+                            builder: (_) => const SignupScreen(),
                           ),
                         );
                       },
-                      child: const Text("Login"),
+                      child: const Text("Create Account"),
                     ),
                   ],
                 ),

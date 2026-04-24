@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import '../utils/app_colors.dart';
-import '../widgets/drawer_widget.dart';
-
-import '../services/api_service.dart';
-import 'tabs/home_tab.dart'; // To access ProductDetailsScreen
+import '../../utils/app_colors.dart';
+import '../../widgets/drawer_widget.dart';
+import '../../services/api_service.dart';
+import '../product/product_details_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -217,12 +217,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildFeaturedProducts() {
+    String baseImageUrl = "https://www.prakrutitech.xyz/abhay/uploads/";
     return ListView.builder(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemCount: products.length,
       itemBuilder: (context, index) {
         var item = products[index];
+        bool isWishlisted = false;
+
+        String finalImageUrl = "";
+        var imgObj = item["image"] ?? item["icon"];
+        if (imgObj != null && imgObj.toString().isNotEmpty) {
+          String img = imgObj.toString();
+          if (img.startsWith('["') && img.endsWith('"]')) {
+            img = img.substring(2, img.length - 2).replaceAll('\\/', '/');
+          }
+          finalImageUrl = img.startsWith('http') ? img : baseImageUrl + img;
+        }
+
+        print("Image URL: " + finalImageUrl);
 
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -232,13 +246,15 @@ class _HomeScreenState extends State<HomeScreen> {
             contentPadding: const EdgeInsets.all(8),
             leading: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                item["image"]?.toString() ?? "",
-                width: 60,
-                height: 60,
-                fit: BoxFit.cover,
-                errorBuilder: (ctx, err, stack) => const Icon(Icons.image_not_supported_outlined, size: 60),
-              ),
+              child: (finalImageUrl.isEmpty)
+                ? const Icon(Icons.image, size: 60)
+                : Image.network(
+                    finalImageUrl,
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                    errorBuilder: (ctx, err, stack) => const Icon(Icons.broken_image, size: 60),
+                  ),
             ),
             title: Text(
               item["name"]?.toString() ?? "",
@@ -247,6 +263,34 @@ class _HomeScreenState extends State<HomeScreen> {
             subtitle: Text(
               "₹ ${item["price"]}",
               style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary),
+            ),
+            trailing: StatefulBuilder(
+              builder: (context, setState) {
+                return IconButton(
+                  icon: Icon(
+                    isWishlisted ? Icons.favorite : Icons.favorite_border,
+                    color: isWishlisted ? Colors.red : Colors.grey,
+                  ),
+                  onPressed: () async {
+                    SharedPreferences sp = await SharedPreferences.getInstance();
+                    String userId = sp.getString("id") ?? "";
+
+                    var res = await ApiService().toggleWishlist(userId, item["id"].toString());
+
+                    if (context.mounted) {
+                      if (res == "add") {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Added to Wishlist")));
+                        setState(() => isWishlisted = true);
+                      } else if (res == "delete") {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Removed from Wishlist")));
+                        setState(() => isWishlisted = false);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error")));
+                      }
+                    }
+                  },
+                );
+              }
             ),
             onTap: () {
               Navigator.push(

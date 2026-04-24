@@ -172,4 +172,47 @@ class ApiService {
       return [];
     }
   }
+
+  // ---------------- WISHLIST ----------------
+  Future<String> toggleWishlist(String userId, String productId) async {
+    try {
+      var resp = await http.post(
+        Uri.parse('https://www.prakrutitech.xyz/abhay/c_wishlist_product.php'),
+        body: {
+          "user_id": userId,
+          "product_id": productId,
+        },
+      );
+
+      print("Wishlist Response: ${resp.body}");
+
+      if (resp.statusCode == 200) {
+        return resp.body.trim(); // "add" or "delete"
+      } else {
+        return "error";
+      }
+    } catch (e) {
+      print("Wishlist Error: $e");
+      return "error";
+    }
+  }
+
+  Future<List<dynamic>> getWishlist(String userId) async {
+    try {
+      var resp = await http.get(
+        Uri.parse('https://www.prakrutitech.xyz/abhay/c_wishlist_product_view.php?user_id=$userId'),
+      );
+
+      print("Wishlist View Response: ${resp.body}");
+
+      if (resp.statusCode == 200) {
+        return json.decode(resp.body);
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print("Wishlist View Error: $e");
+      return [];
+    }
+  }
 }

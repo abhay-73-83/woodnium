@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
 
-class CategoryItem extends StatelessWidget {
+class CategoryCard extends StatelessWidget {
   final IconData icon;
   final String name;
   final VoidCallback onTap;
   final String? image;
 
-  const CategoryItem({
+  const CategoryCard({
     super.key,
     required this.icon,
     required this.name,
@@ -18,8 +18,17 @@ class CategoryItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String baseImageUrl = "https://www.prakrutitech.xyz/abhay/uploads/";
-    if (image != null) {
-      print("Image URL: " + baseImageUrl + (image ?? ""));
+    String finalImageUrl = "";
+    if (image != null && image!.isNotEmpty) {
+      String img = image!;
+      if (img.startsWith('["') && img.endsWith('"]')) {
+        img = img.substring(2, img.length - 2).replaceAll('\\/', '/');
+      }
+      finalImageUrl = img.startsWith('http') ? img : baseImageUrl + img;
+    }
+
+    if (finalImageUrl.isNotEmpty) {
+      print("Image URL: " + finalImageUrl);
     }
 
     return GestureDetector(
@@ -42,14 +51,14 @@ class CategoryItem extends StatelessWidget {
                 ),
               ],
             ),
-            child: (image == null || image == "")
+            child: (finalImageUrl.isEmpty)
               ? Icon(
                   Icons.image,
                   color: AppColors.primary,
                   size: 32,
                 )
               : Image.network(
-                  baseImageUrl + (image ?? ""),
+                  finalImageUrl,
                   height: 80,
                   width: 80,
                   fit: BoxFit.cover,

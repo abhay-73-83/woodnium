@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import '../../widgets/category_item.dart';
+import '../../widgets/category_card.dart';
 import '../placeholder_screen.dart';
 import '../../services/api_service.dart';
 
-class CategoriesTab extends StatefulWidget {
-  const CategoriesTab({super.key});
+class CategoryScreen extends StatefulWidget {
+  const CategoryScreen({super.key});
 
   @override
-  State<CategoriesTab> createState() => _CategoriesTabState();
+  State<CategoryScreen> createState() => _CategoryScreenState();
 }
 
-class _CategoriesTabState extends State<CategoriesTab> {
+class _CategoryScreenState extends State<CategoryScreen> {
   List categories = [];
   bool isLoading = true;
 
@@ -53,10 +53,10 @@ class _CategoriesTabState extends State<CategoriesTab> {
         itemCount: categories.length,
         itemBuilder: (context, index) {
           var item = categories[index];
-          return CategoryItem(
+          return CategoryCard(
             icon: Icons.category,
             name: item['name']?.toString() ?? "",
-            image: item['image']?.toString(),
+            image: item['image']?.toString() ?? item['icon']?.toString(),
             onTap: () {
               Navigator.push(
                 context,

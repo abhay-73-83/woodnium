@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../../utils/app_colors.dart';
 import '../../services/enquiry_service.dart';
 
-class EnquiriesTab extends StatelessWidget {
-  const EnquiriesTab({super.key});
+class EnquiryScreen extends StatelessWidget {
+  const EnquiryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +39,16 @@ class EnquiriesTab extends StatelessWidget {
             final item = enquiries[index];
             final isCompleted = item['status'] == 'Completed';
 
+            String finalImageUrl = "";
+            var imgObj = item["image"] ?? item["icon"];
+            if (imgObj != null && imgObj.toString().isNotEmpty) {
+              String img = imgObj.toString();
+              if (img.startsWith('["') && img.endsWith('"]')) {
+                img = img.substring(2, img.length - 2).replaceAll('\\/', '/');
+              }
+              finalImageUrl = img.startsWith('http') ? img : "https://www.prakrutitech.xyz/abhay/uploads/" + img;
+            }
+
             return Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -55,12 +65,17 @@ class EnquiriesTab extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
-                    child: Image.network(
-                      item['image']!,
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    ),
+                    child: (finalImageUrl.isEmpty)
+                        ? const Icon(Icons.image, size: 100)
+                        : Image.network(
+                            finalImageUrl,
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.broken_image, size: 100);
+                            },
+                          ),
                   ),
                   Expanded(
                     child: Padding(

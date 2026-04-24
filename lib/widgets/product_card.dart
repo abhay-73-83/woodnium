@@ -21,6 +21,15 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String finalImageUrl = "";
+    if (image.isNotEmpty) {
+      String img = image;
+      if (img.startsWith('["') && img.endsWith('"]')) {
+        img = img.substring(2, img.length - 2).replaceAll('\\/', '/');
+      }
+      finalImageUrl = img.startsWith('http') ? img : "https://www.prakrutitech.xyz/abhay/uploads/" + img;
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -40,13 +49,18 @@ class ProductCard extends StatelessWidget {
           Expanded(
             child: Stack(
               children: [
-                Container(
-                  decoration: BoxDecoration(
+                Positioned.fill(
+                  child: ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                    image: DecorationImage(
-                      image: NetworkImage(image),
-                      fit: BoxFit.cover,
-                    ),
+                    child: (finalImageUrl.isEmpty)
+                        ? const Icon(Icons.image, size: 80)
+                        : Image.network(
+                            finalImageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.broken_image);
+                            },
+                          ),
                   ),
                 ),
                 Positioned(

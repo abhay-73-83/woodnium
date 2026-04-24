@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../../utils/app_colors.dart';
 import '../../services/api_service.dart';
+import 'product_details_screen.dart';
 
-class HomeTab extends StatefulWidget {
-  const HomeTab({super.key});
+class ProductScreen extends StatefulWidget {
+  const ProductScreen({super.key});
 
   @override
-  State<HomeTab> createState() => _HomeTabState();
+  State<ProductScreen> createState() => _ProductScreenState();
 }
 
-class _HomeTabState extends State<HomeTab> {
+class _ProductScreenState extends State<ProductScreen> {
   List products = [];
+  Set<String> wishlistedIds = {};
   bool isLoading = true;
 
   @override
@@ -21,11 +24,16 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   Future<void> fetchProducts() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String userId = sp.getString("id") ?? "";
+
     var data = await ApiService().getProducts();
+    var wData = await ApiService().getWishlist(userId);
 
     if (mounted) {
       setState(() {
         products = data;
+        wishlistedIds = wData.map((e) => e["id"].toString()).toSet();
         isLoading = false;
       });
     }
@@ -153,6 +161,17 @@ class _HomeTabState extends State<HomeTab> {
       itemCount: products.length,
       itemBuilder: (context, index) {
         var item = products[index];
+        bool isWishlisted = wishlistedIds.contains(item["id"].toString());
+
+        String finalImageUrl = "";
+        var imgObj = item["image"] ?? item["icon"];
+        if (imgObj != null && imgObj.toString().isNotEmpty) {
+          String img = imgObj.toString();
+          if (img.startsWith('["') && img.endsWith('"]')) {
+            img = img.substring(2, img.length - 2).replaceAll('\\/', '/');
+          }
+          finalImageUrl = img.startsWith('http') ? img : baseImageUrl + img;
+        }
 
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -162,10 +181,10 @@ class _HomeTabState extends State<HomeTab> {
             contentPadding: const EdgeInsets.all(8),
             leading: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: (item["image"] == null || item["image"] == "")
+              child: (finalImageUrl.isEmpty)
                 ? const Icon(Icons.image, size: 80)
                 : Image.network(
-                    baseImageUrl + (item["image"]?.toString() ?? ""),
+                    finalImageUrl,
                     width: 80,
                     height: 80,
                     fit: BoxFit.cover,
@@ -182,6 +201,35 @@ class _HomeTabState extends State<HomeTab> {
               "₹ ${item["price"]}",
               style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary),
             ),
+            trailing: StatefulBuilder(
+              builder: (context, setLocalState) {
+                return IconButton(
+                  icon: Icon(
+                    isWishlisted ? Icons.favorite : Icons.favorite_border,
+                    color: isWishlisted ? AppColors.primary : Colors.grey,
+                  ),
+                  onPressed: () async {
+                    SharedPreferences sp = await SharedPreferences.getInstance();
+                    String userId = sp.getString("id") ?? "";
+
+                    var res = await ApiService().toggleWishlist(userId, item["id"].toString());
+
+                    if (context.mounted) {
+                      if (res == "add") {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Added to Wishlist")));
+                        wishlistedIds.add(item["id"].toString());
+                      } else if (res == "delete") {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Removed from Wishlist")));
+                        wishlistedIds.remove(item["id"].toString());
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error")));
+                      }
+                      setState(() {}); // refresh product UI
+                    }
+                  },
+                );
+              }
+            ),
             onTap: () {
               Navigator.push(
                 context,
@@ -193,102 +241,6 @@ class _HomeTabState extends State<HomeTab> {
           ),
         );
       },
-    );
-  }
-}
-
-class ProductDetailsScreen extends StatelessWidget {
-  final Map product;
-
-  const ProductDetailsScreen({super.key, required this.product});
-
-  @override
-  Widget build(BuildContext context) {
-    String baseImageUrl = "https://www.prakrutitech.xyz/abhay/uploads/";
-    
-    if (product["image"] != null) {
-      print("Image URL: " + baseImageUrl + (product["image"]?.toString() ?? ""));
-    }
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(product["name"]?.toString() ?? "Product Details"),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (product["image"] != null && product["image"].toString().isNotEmpty)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.network(
-                  baseImageUrl + product["image"].toString(),
-                  width: double.infinity,
-                  height: 250,
-                  fit: BoxFit.cover,
-                  errorBuilder: (ctx, err, stack) => const SizedBox(
-                    height: 250,
-                    child: Center(child: Icon(Icons.broken_image, size: 50)),
-                  ),
-                ),
-              ),
-            const SizedBox(height: 24),
-            Text(
-              product["name"]?.toString() ?? "",
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              "Price: ₹ ${product["price"]}",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.accent.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                "Category: ${product["category_name"] ?? ""}",
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.accent,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              "Description",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              product["description"]?.toString() ?? "",
-              style: const TextStyle(
-                fontSize: 16,
-                height: 1.5,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

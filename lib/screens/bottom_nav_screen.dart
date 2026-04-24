@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../utils/app_colors.dart';
-import 'tabs/home_tab.dart';
-import 'tabs/categories_tab.dart';
-import 'tabs/wishlist_tab.dart';
-import 'tabs/enquiries_tab.dart';
-import 'tabs/profile_tab.dart';
+import 'product/product_screen.dart';
+import 'category/category_screen.dart';
+import 'wishlist/wishlist_screen.dart';
+import 'enquiry/enquiry_screen.dart';
+import 'profile/profile_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/wishlist_service.dart';
 import '../services/enquiry_service.dart';
@@ -23,12 +23,14 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   int _currentIndex = 0;
   bool _isVisible = true;
 
-  final List<Widget> _tabs = const [
-    HomeTab(),
-    CategoriesTab(),
-    WishlistTab(),
-    EnquiriesTab(),
-    ProfileTab(),
+  final GlobalKey<WishlistScreenState> wishlistKey = GlobalKey();
+
+  late final List<Widget> _tabs = [
+    const ProductScreen(),
+    const CategoryScreen(),
+    WishlistScreen(key: wishlistKey),
+    const EnquiryScreen(),
+    const ProfileScreen(),
   ];
 
   String _appBarTitle = 'WoodNium';
@@ -43,6 +45,9 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   void _onTabToggled() {
     if (mounted && _currentIndex != BottomNavScreen.tabNotifier.value) {
       setState(() => _currentIndex = BottomNavScreen.tabNotifier.value);
+    }
+    if (BottomNavScreen.tabNotifier.value == 2) {
+      wishlistKey.currentState?.loadWishlist();
     }
   }
 

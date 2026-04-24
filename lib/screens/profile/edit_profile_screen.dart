@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
-import '../utils/app_colors.dart';
+import '../../services/api_service.dart';
+import '../../utils/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../services/connectivity_service.dart';
-import 'login_screen.dart';
-import 'no_internet_screen.dart';
+import '../../services/connectivity_service.dart';
+import '../auth/login_screen.dart';
+import '../no_internet_screen.dart';
 
-class ProfileScreen extends StatefulWidget {
+class EditProfileScreen extends StatefulWidget {
   final String initialName;
   final String initialEmail;
   final String initialPhone;
   final String initialPassword;
 
-  const ProfileScreen({
+  const EditProfileScreen({
     super.key,
     required this.initialName,
     required this.initialEmail,
@@ -21,10 +21,10 @@ class ProfileScreen extends StatefulWidget {
   });
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _nameCtrl;
   late TextEditingController _emailCtrl;
   late TextEditingController _phoneCtrl;
