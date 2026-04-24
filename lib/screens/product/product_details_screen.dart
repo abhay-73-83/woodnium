@@ -32,36 +32,6 @@ class ProductDetailsScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(product["name"]?.toString() ?? "Product Details"),
-        actions: [
-          StatefulBuilder(
-            builder: (context, setState) {
-              return IconButton(
-                icon: Icon(
-                  isWishlisted ? Icons.favorite : Icons.favorite_border,
-                  color: isWishlisted ? AppColors.primary : Colors.grey,
-                ),
-                onPressed: () async {
-                  SharedPreferences sp = await SharedPreferences.getInstance();
-                  String userId = sp.getString("id") ?? "";
-
-                  var res = await ApiService().toggleWishlist(userId, product["id"].toString());
-
-                  if (context.mounted) {
-                    if (res == "add") {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Added to Wishlist")));
-                      setState(() => isWishlisted = true);
-                    } else if (res == "delete") {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Removed from Wishlist")));
-                      setState(() => isWishlisted = false);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error")));
-                    }
-                  }
-                },
-              );
-            }
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
