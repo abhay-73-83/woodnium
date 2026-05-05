@@ -17,19 +17,8 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String baseImageUrl = "https://www.prakrutitech.xyz/abhay/uploads/";
-    String finalImageUrl = "";
-    if (image != null && image!.isNotEmpty) {
-      String img = image!;
-      if (img.startsWith('["') && img.endsWith('"]')) {
-        img = img.substring(2, img.length - 2).replaceAll('\\/', '/');
-      }
-      finalImageUrl = img.startsWith('http') ? img : baseImageUrl + img;
-    }
-
-    if (finalImageUrl.isNotEmpty) {
-      print("Image URL: " + finalImageUrl);
-    }
+    String img = (image ?? "").replaceAll("\\/", "/");
+    // print("CATEGORY IMAGE URL => " + img);
 
     return GestureDetector(
       onTap: onTap,
@@ -51,19 +40,27 @@ class CategoryCard extends StatelessWidget {
                 ),
               ],
             ),
-            child: (finalImageUrl.isEmpty)
-              ? Icon(
-                  Icons.image,
-                  color: AppColors.primary,
-                  size: 32,
+            child: img.isEmpty
+              ? Container(
+                  height: 80,
+                  width: 80,
+                  color: Colors.grey.shade200,
+                  child: const Icon(Icons.image_not_supported),
                 )
               : Image.network(
-                  finalImageUrl,
+                  img,
                   height: 80,
                   width: 80,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    return const Icon(Icons.image_not_supported);
+                    // print("FAILED CATEGORY IMAGE => $img");
+                    return Container(
+                      height: 80,
+                      width: 80,
+                      color: Colors.grey.shade200,
+                      alignment: Alignment.center,
+                      child: const Icon(Icons.broken_image, size: 40),
+                    );
                   },
                 ),
           ),

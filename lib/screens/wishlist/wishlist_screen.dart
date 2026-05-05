@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/app_colors.dart';
+import '../../widgets/product_card.dart';
 import '../../services/api_service.dart';
+import '../../models/product.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
@@ -11,7 +13,7 @@ class WishlistScreen extends StatefulWidget {
 }
 
 class WishlistScreenState extends State<WishlistScreen> {
-  List wishlist = [];
+  List<Product> wishlist = [];
   bool isLoading = true;
 
   @override
@@ -40,7 +42,7 @@ class WishlistScreenState extends State<WishlistScreen> {
 
     if (mounted) {
       setState(() {
-        wishlist = data;
+        wishlist = data.map((e) => Product.fromJson(e)).toList();
         isLoading = false;
       });
     }
@@ -65,7 +67,7 @@ class WishlistScreenState extends State<WishlistScreen> {
             ),
             const SizedBox(height: 24),
             const Text(
-              'No Wishlist Items',
+              'No Wishlist Items ❤️',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -88,63 +90,24 @@ class WishlistScreenState extends State<WishlistScreen> {
         padding: const EdgeInsets.all(20),
         itemCount: wishlist.length,
         itemBuilder: (context, index) {
-          var item = wishlist[index];
+          Product item = wishlist[index];
 
-        String finalImageUrl = "";
-        var imgObj = item["image"] ?? item["icon"];
-        if (imgObj != null && imgObj.toString().isNotEmpty) {
-          String img = imgObj.toString();
-          if (img.startsWith('["') && img.endsWith('"]')) {
-            img = img.substring(2, img.length - 2).replaceAll('\\/', '/');
-          }
-          finalImageUrl = img.startsWith('http') ? img : "https://www.prakrutitech.xyz/abhay/uploads/" + img;
-        }
-
-        return Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(8),
-            leading: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: finalImageUrl.isEmpty 
-                  ? const Icon(Icons.image, size: 60)
-                  : Image.network(
-                      finalImageUrl,
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 60),
-                    ),
-            ),
-            title: Text(item["name"]?.toString() ?? ""),
-            subtitle: Text("₹ ${item["price"]}"),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
-              onPressed: () async {
-                SharedPreferences sp = await SharedPreferences.getInstance();
-                String userId = sp.getString("id") ?? "";
-                
-                var res = await ApiService().toggleWishlist(userId, item["id"].toString());
-                
-                if (res == "delete") {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Removed from Wishlist")),
-                    );
-                    loadWishlist(); // reload after delete
-                  }
-                } else {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Error removing item")),
-                    );
-                  }
-                }
-              },
-            ),
-          ),
+        return ProductCard(
+          product: item,
+          isWishlisted: true, // Always true in wishlist
+          onWishlistTap: () {
+            setState(() {
+              wishlist.removeWhere((p) => p.id == item.id);
+            });
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Removed from Wishlist")),
+              );
+            }
+          },
+          onCardTap: () {
+            loadWishlist(); // refresh if changed inside details
+          },
         );
       },
     ));

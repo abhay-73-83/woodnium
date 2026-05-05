@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../utils/app_colors.dart';
-import 'product/product_screen.dart';
+import 'home/home_screen.dart';
 import 'category/category_screen.dart';
 import 'wishlist/wishlist_screen.dart';
 import 'enquiry/enquiry_screen.dart';
-import 'profile/profile_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/wishlist_service.dart';
 import '../services/enquiry_service.dart';
@@ -26,11 +25,10 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   final GlobalKey<WishlistScreenState> wishlistKey = GlobalKey();
 
   late final List<Widget> _tabs = [
-    const ProductScreen(),
+    const HomeScreen(),
     const CategoryScreen(),
     WishlistScreen(key: wishlistKey),
     const EnquiryScreen(),
-    const ProfileScreen(),
   ];
 
   String _appBarTitle = 'WoodNium';
@@ -79,7 +77,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
+      appBar: _currentIndex == 0 ? null : AppBar(
         title: Text(_appBarTitle),
         centerTitle: false,
         elevation: 0,
@@ -141,11 +139,6 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                   icon: Icon(Icons.inventory_2_outlined),
                   activeIcon: Icon(Icons.inventory_2_rounded),
                   label: 'My Enquiries',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person_outline),
-                  activeIcon: Icon(Icons.person_rounded),
-                  label: 'Profile',
                 ),
               ],
             ),

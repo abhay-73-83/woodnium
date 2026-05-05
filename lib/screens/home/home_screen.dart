@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/drawer_widget.dart';
+import '../../widgets/product_grid_card.dart';
 import '../../services/api_service.dart';
-import '../product/product_details_screen.dart';
+import '../../models/product.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,8 +16,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List products = [];
+  List<Product> products = [];
+  Set<String> wishlistedIds = {};
   bool isLoading = true;
+  String searchText = "";
 
   @override
   void initState() {
@@ -25,11 +29,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> fetchProducts() async {
     var data = await ApiService().getProducts();
+    
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String userId = sp.getString("id") ?? "";
+    var wData = await ApiService().getWishlist(userId);
 
     if (mounted) {
       setState(() {
-        products = data;
+        products = data.map((e) => Product.fromJson(e)).toList();
+        wishlistedIds = wData.map((e) => e["id"].toString()).toSet();
         isLoading = false;
+      });
+    }
+  }
+
+  Future<void> refreshWishlist() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String userId = sp.getString("id") ?? "";
+    var wData = await ApiService().getWishlist(userId);
+    if (mounted) {
+      setState(() {
+        wishlistedIds = wData.map((e) => e["id"].toString()).toSet();
       });
     }
   }
@@ -54,38 +74,67 @@ class _HomeScreenState extends State<HomeScreen> {
       drawer: const DrawerWidget(),
       body: isLoading 
         ? const Center(child: CircularProgressIndicator())
-        : (products.isEmpty 
-            ? const Center(child: Text("No Products Found"))
-            : SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        : RefreshIndicator(
+            onRefresh: fetchProducts,
+            color: AppColors.primary,
+            child: products.isEmpty 
+              ? ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   children: [
-                    const SizedBox(height: 16),
-                    _buildBannerCarousel(),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle('Categories'),
-                    const SizedBox(height: 16),
-                    _buildCategories(),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle('Featured Products'),
-                    const SizedBox(height: 16),
-                    _buildFeaturedProducts(),
-                    const SizedBox(height: 32),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.8,
+                      child: const Center(child: Text("No Products Found")),
+                    )
                   ],
+                )
+              : SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSearchBar(),
+                      const SizedBox(height: 16),
+                      _buildBannerCarousel(),
+                      const SizedBox(height: 24),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'Featured Products',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildFeaturedProducts(),
+                    ],
+                  ),
                 ),
-              )),
+          ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: AppColors.textPrimary,
+      padding: const EdgeInsets.all(12),
+      child: TextField(
+        onChanged: (val) {
+          setState(() {
+            searchText = val.toLowerCase();
+          });
+        },
+        decoration: InputDecoration(
+          hintText: "Search furniture...",
+          prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+          filled: true,
+          fillColor: AppColors.background,
+          contentPadding: const EdgeInsets.symmetric(vertical: 0),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30),
+            borderSide: BorderSide.none,
+          ),
         ),
       ),
     );
@@ -159,147 +208,54 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCategories() {
-    final categories = [
-      {'icon': Icons.chair_alt, 'name': 'Chair'},
-      {'icon': Icons.table_restaurant, 'name': 'Table'},
-      {'icon': Icons.bed, 'name': 'Bed'},
-      {'icon': Icons.weekend, 'name': 'Sofa'},
-      {'icon': Icons.door_sliding, 'name': 'Cupboard'},
-    ];
-
-    return SizedBox(
-      height: 100,
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        scrollDirection: Axis.horizontal,
-        itemCount: categories.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 16),
-        itemBuilder: (context, index) {
-          final cat = categories[index];
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                height: 64,
-                width: 64,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.08),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  cat['icon'] as IconData,
-                  color: AppColors.primary,
-                  size: 32,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                cat['name'] as String,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
   Widget _buildFeaturedProducts() {
-    String baseImageUrl = "https://www.prakrutitech.xyz/abhay/uploads/";
-    return ListView.builder(
+    List<Product> filteredProducts = products.where((p) {
+      return p.name.toLowerCase().contains(searchText);
+    }).toList();
+
+    if (filteredProducts.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: Text(
+            "No products found",
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+        ),
+      );
+    }
+
+    return MasonryGridView.builder(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemCount: products.length,
+      padding: const EdgeInsets.all(12),
+      itemCount: filteredProducts.length,
+      gridDelegate: const SliverSimpleGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+      ),
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
       itemBuilder: (context, index) {
-        var item = products[index];
-        bool isWishlisted = false;
+        Product item = filteredProducts[index];
+        bool isWishlisted = wishlistedIds.contains(item.id);
 
-        String finalImageUrl = "";
-        var imgObj = item["image"] ?? item["icon"];
-        if (imgObj != null && imgObj.toString().isNotEmpty) {
-          String img = imgObj.toString();
-          if (img.startsWith('["') && img.endsWith('"]')) {
-            img = img.substring(2, img.length - 2).replaceAll('\\/', '/');
-          }
-          finalImageUrl = img.startsWith('http') ? img : baseImageUrl + img;
-        }
-
-        print("Image URL: " + finalImageUrl);
-
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(8),
-            leading: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: (finalImageUrl.isEmpty)
-                ? const Icon(Icons.image, size: 60)
-                : Image.network(
-                    finalImageUrl,
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.cover,
-                    errorBuilder: (ctx, err, stack) => const Icon(Icons.broken_image, size: 60),
-                  ),
-            ),
-            title: Text(
-              item["name"]?.toString() ?? "",
-              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-            ),
-            subtitle: Text(
-              "₹ ${item["price"]}",
-              style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary),
-            ),
-            trailing: StatefulBuilder(
-              builder: (context, setState) {
-                return IconButton(
-                  icon: Icon(
-                    isWishlisted ? Icons.favorite : Icons.favorite_border,
-                    color: isWishlisted ? Colors.red : Colors.grey,
-                  ),
-                  onPressed: () async {
-                    SharedPreferences sp = await SharedPreferences.getInstance();
-                    String userId = sp.getString("id") ?? "";
-
-                    var res = await ApiService().toggleWishlist(userId, item["id"].toString());
-
-                    if (context.mounted) {
-                      if (res == "add") {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Added to Wishlist")));
-                        setState(() => isWishlisted = true);
-                      } else if (res == "delete") {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Removed from Wishlist")));
-                        setState(() => isWishlisted = false);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error")));
-                      }
-                    }
-                  },
-                );
-              }
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ProductDetailsScreen(product: item),
-                ),
-              );
-            },
+        return TweenAnimationBuilder(
+          duration: const Duration(milliseconds: 400),
+          tween: Tween<double>(begin: 0.0, end: 1.0),
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(0, 30 * (1 - value)),
+                child: child,
+              ),
+            );
+          },
+          child: ProductGridCard(
+            product: item,
+            isWishlisted: isWishlisted,
+            onWishlistTap: refreshWishlist,
+            onCardTap: refreshWishlist,
           ),
         );
       },
