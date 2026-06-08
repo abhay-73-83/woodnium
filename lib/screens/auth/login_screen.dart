@@ -105,78 +105,125 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                const SizedBox(height: 40),
-                Container(
-                  width: 200,
-                  height: 200,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppColors.secondary.withAlpha(10),
-                    shape: BoxShape.circle,
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              height: 210,
+              decoration: BoxDecoration(
+                gradient: AppColors.studioGradient,
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(color: Colors.white, width: 1.2),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.walnut.withValues(alpha: 0.12),
+                    blurRadius: 28,
+                    offset: const Offset(0, 16),
                   ),
-                  child: Image.asset("assets/logo.png"),
-                ),
-
-                const SizedBox(height: 32),
-
-                const Text(
-                  'Welcome Back',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                ),
-
-                const SizedBox(height: 40),
-
-                CustomTextField(
-                  controller: _emailController,
-                  hintText: 'Email',
-                  keyboardType: TextInputType.emailAddress,
-                  prefixIcon: Icons.email,
-                  validator: (value) {
-                    final RegExp emailRegex = RegExp(
-                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                    );
-                    if (value == null) {
-                      return 'Enter a email address';
-                    }
-                    else if(!emailRegex.hasMatch(value))
-                    {
-                      return 'Enter a valid email address';
-                    }
-                    return null; // Input is valid
-                  },
-                ),
-
-                const SizedBox(height: 20),
-
-                CustomTextField(
-                  controller: _passwordController,
-                  hintText: 'Password',
-                  prefixIcon: Icons.lock,
-                  isPassword: true,
-                  validator: (v) => v!.isEmpty ? 'Enter password' : null,
-                ),
-
-                const SizedBox(height: 30),
-
-                CustomButton(
-                  text: 'LOGIN',
-                  onPressed: checkdata,
-                  isLoading: _isLoading,
-                ),
-
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                ],
+              ),
+              child: Stack(
+                children: [
+                  Positioned(
+                    right: 22,
+                    top: 24,
+                    child: Container(
+                      width: 96,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(28),
+                        border: Border.all(color: Colors.white, width: 1.2),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Image.asset("assets/logo.png"),
+                      ),
+                    ),
+                  ),
+                  const Positioned(
+                    left: 22,
+                    bottom: 24,
+                    right: 132,
+                    child: Text(
+                      "Welcome to your wooden comfort studio.",
+                      style: TextStyle(
+                        color: AppColors.graphite,
+                        fontSize: 30,
+                        height: 1.02,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: AppColors.aluminiumGradient,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: Colors.white, width: 1.2),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.07),
+                    blurRadius: 24,
+                    offset: const Offset(0, 14),
+                  ),
+                ],
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
                   children: [
-                    const Text("Don't have an account?"),
-
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Login",
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.graphite,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    CustomTextField(
+                      controller: _emailController,
+                      hintText: 'Email',
+                      keyboardType: TextInputType.emailAddress,
+                      prefixIcon: Icons.email,
+                      validator: (value) {
+                        final RegExp emailRegex = RegExp(
+                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        );
+                        if (value == null) {
+                          return 'Enter a email address';
+                        } else if (!emailRegex.hasMatch(value)) {
+                          return 'Enter a valid email address';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    CustomTextField(
+                      controller: _passwordController,
+                      hintText: 'Password',
+                      prefixIcon: Icons.lock,
+                      isPassword: true,
+                      validator: (v) => v!.isEmpty ? 'Enter password' : null,
+                    ),
+                    const SizedBox(height: 24),
+                    CustomButton(
+                      text: 'LOGIN',
+                      onPressed: checkdata,
+                      isLoading: _isLoading,
+                    ),
+                    const SizedBox(height: 14),
                     TextButton(
                       onPressed: () {
                         Navigator.pushReplacement(
@@ -186,13 +233,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         );
                       },
-                      child: const Text("Create Account"),
+                      child: const Text("Create new account"),
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

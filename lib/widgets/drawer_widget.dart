@@ -174,86 +174,123 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     return Drawer(
       backgroundColor: AppColors.background,
       child: ListView(
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.all(16),
         children: [
-          // HEADER
+          SizedBox(height: MediaQuery.of(context).padding.top),
           Container(
-            width: double.infinity,
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + 24,
-              bottom: 24,
-            ),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.primary, AppColors.accent],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: AppColors.studioGradient,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: Colors.white, width: 1.2),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.walnut.withValues(alpha: 0.1),
+                  blurRadius: 24,
+                  offset: const Offset(0, 14),
+                ),
+              ],
             ),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  radius: 36,
-                  backgroundColor: Colors.white,
-                  child: Text(
-                    _name.isNotEmpty ? _name[0].toUpperCase() : "S",
-                    style: const TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                Row(
+                  children: [
+                    Container(
+                      width: 58,
+                      height: 58,
+                      decoration: BoxDecoration(
+                        gradient: AppColors.woodGradient,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Center(
+                        child: Text(
+                          _name.isNotEmpty ? _name[0].toUpperCase() : "S",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    const Spacer(),
+                    const Icon(Icons.design_services_rounded),
+                  ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 18),
                 Text(
                   _name,
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    color: AppColors.graphite,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
                 if (_email.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
                     _email,
-                    style: const TextStyle(color: Colors.white70, fontSize: 14),
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                    ),
                   ),
                 ],
                 if (_phone.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
                     _phone,
-                    style: const TextStyle(color: Colors.white70, fontSize: 14),
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                    ),
                   ),
                 ],
               ],
             ),
           ),
-
-          ListTile(
-            leading: const Icon(Icons.person, color: AppColors.primary),
-            title: const Text("Edit Profile"),
-            onTap: _navigateToEditProfile,
+          const SizedBox(height: 18),
+          _drawerTile(
+            Icons.person_rounded,
+            "Edit Profile",
+            _navigateToEditProfile,
           ),
-
-          ListTile(
-            leading: const Icon(Icons.delete, color: Colors.red),
-            title: const Text(
-              "Delete Account",
-              style: TextStyle(color: Colors.red),
-            ),
-            onTap: _deleteUser,
+          _drawerTile(
+            Icons.delete_rounded,
+            "Delete Account",
+            _deleteUser,
+            danger: true,
           ),
-
-          ListTile(
-            leading: const Icon(Icons.logout, color: AppColors.textPrimary),
-            title: const Text("Logout"),
-            onTap: _logout,
-          ),
+          _drawerTile(Icons.logout_rounded, "Logout", _logout),
         ],
+      ),
+    );
+  }
+
+  Widget _drawerTile(
+    IconData icon,
+    String title,
+    VoidCallback onTap, {
+    bool danger = false,
+  }) {
+    final color = danger ? AppColors.error : AppColors.graphite;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        gradient: AppColors.aluminiumGradient,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.white, width: 1.2),
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: color),
+        title: Text(
+          title,
+          style: TextStyle(color: color, fontWeight: FontWeight.w800),
+        ),
+        trailing: const Icon(Icons.chevron_right_rounded),
+        onTap: onTap,
       ),
     );
   }

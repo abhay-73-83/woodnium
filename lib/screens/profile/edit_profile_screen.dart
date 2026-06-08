@@ -265,7 +265,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           "Hello, $_currentName...",
           style: const TextStyle(color: AppColors.textPrimary),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.background,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
@@ -273,11 +273,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            Card(
-              elevation: 4,
-              shadowColor: AppColors.primary.withValues(alpha: 0.1),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+            Container(
+              decoration: BoxDecoration(
+                gradient: AppColors.aluminiumGradient,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: Colors.white, width: 1.2),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.walnut.withValues(alpha: 0.08),
+                    blurRadius: 24,
+                    offset: const Offset(0, 14),
+                  ),
+                ],
               ),
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -346,13 +353,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         validator: (v) => v!.isEmpty ? 'Enter password' : null,
                       ),
                       const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: _isLoading ? null : updateUser,
-                        child: _isLoading
-                            ? const CircularProgressIndicator(
-                                color: Colors.white,
-                              )
-                            : const Text('Update Profile'),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 54,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : updateUser,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: _isLoading
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                              : const Text(
+                                  'Update Profile',
+                                  style: TextStyle(fontWeight: FontWeight.w900),
+                                ),
+                        ),
                       ),
                     ],
                   ),
@@ -360,10 +381,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _isLoading ? null : deleteUser,
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-              child: const Text('Delete Account'),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _isLoading ? null : deleteUser,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.error,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                icon: const Icon(Icons.delete_outline),
+                label: const Text('Delete Account'),
+              ),
             ),
           ],
         ),

@@ -36,13 +36,14 @@ class _CustomTextFieldState extends State<CustomTextField> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        gradient: AppColors.aluminiumGradient,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.white, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.08),
-            offset: const Offset(0, 4),
-            blurRadius: 10,
+            color: AppColors.primary.withValues(alpha: 0.07),
+            offset: const Offset(0, 12),
+            blurRadius: 22,
           ),
         ],
       ),
@@ -54,29 +55,37 @@ class _CustomTextFieldState extends State<CustomTextField> {
         style: const TextStyle(color: AppColors.textPrimary),
         decoration: InputDecoration(
           hintText: widget.hintText,
-          prefixIcon: Icon(widget.prefixIcon, color: AppColors.accent),
+          prefixIcon: Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              gradient: AppColors.softWoodGradient,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white, width: 1),
+            ),
+            child: Icon(widget.prefixIcon, color: AppColors.primary, size: 20),
+          ),
 
           // ✅ AUTO SHOW EYE ICON ONLY FOR PASSWORD
           suffixIcon: widget.isPassword
               ? IconButton(
-            color: AppColors.accent,
-            icon: Icon(
-              _isObscure
-                  ? Icons.visibility_off
-                  : Icons.visibility,
-            ),
-            onPressed: () {
-              setState(() {
-                _isObscure = !_isObscure;
-              });
-            },
-          )
+                  color: AppColors.primary,
+                  icon: Icon(
+                    _isObscure ? Icons.visibility_off : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isObscure = !_isObscure;
+                    });
+                  },
+                )
               : null,
 
-          contentPadding:
-          const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 17,
+            horizontal: 18,
+          ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(22),
             borderSide: BorderSide.none,
           ),
           filled: true,

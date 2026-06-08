@@ -3,9 +3,15 @@ import 'package:woodnium/services/storage_service.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
+  static const String _baseUrl = 'https://www.prakrutitech.xyz/abhay';
 
   // ---------------- SIGNUP ----------------
-  Future<int> signupUser( String name, String email, String phone, String password) async {
+  Future<int> signupUser(
+    String name,
+    String email,
+    String phone,
+    String password,
+  ) async {
     try {
       var resp = await http.post(
         Uri.parse('https://www.prakrutitech.xyz/abhay/c_user_signup.php'),
@@ -21,7 +27,6 @@ class ApiService {
       print("Signup Response: ${resp.body}");
 
       if (resp.statusCode == 200) {
-
         // ✅ AUTO LOGIN AFTER SIGNUP
         await StorageService.setLoggedIn(true);
         await StorageService.setUserData(name, email);
@@ -30,7 +35,6 @@ class ApiService {
       } else {
         return 0;
       }
-
     } catch (e) {
       print("Signup Error: $e");
       return 0;
@@ -42,10 +46,7 @@ class ApiService {
     try {
       var resp = await http.post(
         Uri.parse('https://www.prakrutitech.xyz/abhay/c_user_signin.php'),
-        body: {
-          'email': email,
-          'password': password,
-        },
+        body: {'email': email, 'password': password},
       );
 
       print("Signin Status Code: ${resp.statusCode}");
@@ -70,7 +71,12 @@ class ApiService {
 
   // ---------------- UPDATE ----------------
   Future<int> updateUser(
-      String id, String name, String email, String phone, String password) async {
+    String id,
+    String name,
+    String email,
+    String phone,
+    String password,
+  ) async {
     try {
       var resp = await http.post(
         Uri.parse('https://www.prakrutitech.xyz/abhay/c_user_update.php'),
@@ -108,9 +114,7 @@ class ApiService {
 
       var resp = await http.post(
         Uri.parse('https://www.prakrutitech.xyz/abhay/c_user_delete.php'),
-        body: {
-          'id': id,
-        },
+        body: {'id': id},
       );
 
       print("Status Code: ${resp.statusCode}");
@@ -178,10 +182,7 @@ class ApiService {
     try {
       var resp = await http.post(
         Uri.parse('https://www.prakrutitech.xyz/abhay/c_wishlist_product.php'),
-        body: {
-          "user_id": userId,
-          "product_id": productId,
-        },
+        body: {"user_id": userId, "product_id": productId},
       );
 
       print("Wishlist Response: ${resp.body}");
@@ -200,10 +201,71 @@ class ApiService {
   Future<List<dynamic>> getWishlist(String userId) async {
     try {
       var resp = await http.get(
-        Uri.parse('https://www.prakrutitech.xyz/abhay/c_wishlist_product_view.php?user_id=$userId'),
+        Uri.parse(
+          'https://www.prakrutitech.xyz/abhay/c_wishlist_product_view.php?user_id=$userId',
+        ),
       );
 
       print("Wishlist View Response: ${resp.body}");
+
+      if (resp.statusCode == 200) {
+        final data = json.decode(resp.body);
+        return data is List ? data : [];
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print("Wishlist View Error: $e");
+      return [];
+    }
+  }
+
+  // ---------------- ENQUIRY NOW ----------------
+  Future<String> addEnquiryNow({
+    required String userId,
+    required String productId,
+    required String message,
+  }) async {
+    try {
+      var resp = await http.post(
+        Uri.parse('$_baseUrl/c_inquiry_create_user.php'),
+        body: {'user_id': userId, 'product_id': productId, 'message': message},
+      );
+
+      print("Enquiry Status Code: ${resp.statusCode}");
+      print("Enquiry Response: ${resp.body}");
+
+      if (resp.statusCode != 200) {
+        return "0";
+      }
+
+      final body = resp.body.trim();
+      if (body == "1") {
+        return "1";
+      }
+
+      try {
+        final data = json.decode(body);
+        if (data is Map && (data["status"] == 1 || data["success"] == true)) {
+          return "1";
+        }
+      } catch (_) {}
+
+      return body.isEmpty ? "0" : body;
+    } catch (e) {
+      print("Enquiry Error: $e");
+      return "0";
+    }
+  }
+
+  // ---------------- MY ENQUIRIES ----------------
+  Future<List<dynamic>> getUserEnquiries(String userId) async {
+    try {
+      var resp = await http.get(
+        Uri.parse('$_baseUrl/c_inquiry_view_user.php?user_id=$userId'),
+      );
+
+      print("My Enquiry Response: ${resp.body}");
 
       if (resp.statusCode == 200) {
         return json.decode(resp.body);
@@ -211,7 +273,57 @@ class ApiService {
         return [];
       }
     } catch (e) {
-      print("Wishlist View Error: $e");
+      print("My Enquiry Error: $e");
+      return [];
+    }
+  }
+
+  // ---------------- PRODUCT RATING ----------------
+  Future<String> addProductRating({
+    required String userId,
+    required String productId,
+    required String rating,
+    required String feedback,
+  }) async {
+    try {
+      var resp = await http.post(
+        Uri.parse('$_baseUrl/c_rating_product_add.php'),
+        body: {
+          'user_id': userId,
+          'product_id': productId,
+          'rating': rating,
+          'feedback': feedback,
+        },
+      );
+
+      print("Rating Add Response: ${resp.body}");
+
+      if (resp.statusCode == 200) {
+        return resp.body.trim();
+      } else {
+        return "0";
+      }
+    } catch (e) {
+      print("Rating Add Error: $e");
+      return "0";
+    }
+  }
+
+  Future<List<dynamic>> getProductRatings(String productId) async {
+    try {
+      var resp = await http.get(
+        Uri.parse('$_baseUrl/c_rating_product_view.php?product_id=$productId'),
+      );
+
+      print("Rating View Response: ${resp.body}");
+
+      if (resp.statusCode == 200) {
+        return json.decode(resp.body);
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print("Rating View Error: $e");
       return [];
     }
   }

@@ -16,12 +16,15 @@ class StorageService {
     return prefs.getBool(_isLoggedInKey) ?? false;
   }
 
-  static Future<void> setUserData(String name, String email, [String? id]) async {
+  static Future<void> setUserData(
+    String name,
+    String email, [
+    String? id,
+  ]) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_userNameKey, name);
     await prefs.setString(_userEmailKey, email);
-    if (id != null)
-    {
+    if (id != null) {
       print(id);
       await prefs.setString(_userIdKey, id);
     }

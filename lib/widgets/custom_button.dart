@@ -17,15 +17,15 @@ class CustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 56,
+      height: 58,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        gradient: AppColors.woodGradient,
+        borderRadius: BorderRadius.circular(22),
+        gradient: AppColors.emberGradient,
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
-            offset: const Offset(0, 4),
-            blurRadius: 12,
+            color: AppColors.copper.withValues(alpha: 0.2),
+            offset: const Offset(0, 14),
+            blurRadius: 24,
           ),
         ],
       ),
@@ -35,7 +35,7 @@ class CustomButton extends StatelessWidget {
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(22),
           ),
         ),
         child: isLoading
@@ -51,8 +51,8 @@ class CustomButton extends StatelessWidget {
                 text,
                 style: const TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.0,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.2,
                   color: Colors.white,
                 ),
               ),

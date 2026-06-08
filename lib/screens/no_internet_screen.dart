@@ -11,7 +11,7 @@ class NoInternetScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: AppColors.background,
+        decoration: const BoxDecoration(gradient: AppColors.studioGradient),
         width: double.infinity,
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -20,8 +20,16 @@ class NoInternetScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: AppColors.surface.withValues(alpha: 0.9),
                 shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.walnut.withValues(alpha: 0.1),
+                    blurRadius: 28,
+                    offset: const Offset(0, 16),
+                  ),
+                ],
               ),
               child: const Icon(
                 Icons.wifi_off_rounded,
@@ -51,10 +59,7 @@ class NoInternetScreen extends StatelessWidget {
             const SizedBox(height: 48),
             SizedBox(
               width: 200,
-              child: CustomButton(
-                text: 'RETRY',
-                onPressed: onRetry,
-              ),
+              child: CustomButton(text: 'RETRY', onPressed: onRetry),
             ),
           ],
         ),

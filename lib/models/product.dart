@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class Product {
   final String id;
   final String name;
@@ -22,9 +24,26 @@ class Product {
       price: json["price"]?.toString() ?? "",
       description: json["description"]?.toString() ?? "",
       categoryName: json["category_name"]?.toString() ?? "",
-      images: json["image"] != null
-          ? List<String>.from(json["image"])
-          : [],
+      images: _parseImages(json["image"]),
     );
+  }
+
+  static List<String> _parseImages(dynamic value) {
+    if (value == null) return [];
+    if (value is List) {
+      return value.map((e) => e.toString()).toList();
+    }
+
+    final text = value.toString();
+    if (text.isEmpty) return [];
+
+    try {
+      final decoded = jsonDecode(text);
+      if (decoded is List) {
+        return decoded.map((e) => e.toString()).toList();
+      }
+    } catch (_) {}
+
+    return [text];
   }
 }

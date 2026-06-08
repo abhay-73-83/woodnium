@@ -20,7 +20,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _phone = '';
   String _password = '';
 
-
   @override
   void initState() {
     super.initState();
@@ -48,7 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),
-          (route) => false,
+      (route) => false,
     );
   }
 
@@ -66,10 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -122,7 +118,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const LoginScreen()),
-              (route) => false,
+          (route) => false,
         );
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -164,7 +160,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           initialEmail: _email,
           initialPhone: _phone,
           initialPassword: _password,
-
         ),
       ),
     );
@@ -191,13 +186,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            gradient: AppColors.studioGradient,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: Colors.white, width: 1.2),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.08),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+                color: AppColors.walnut.withValues(alpha: 0.1),
+                blurRadius: 24,
+                offset: const Offset(0, 14),
               ),
             ],
           ),
@@ -205,14 +201,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               CircleAvatar(
                 radius: 40,
-                backgroundColor: AppColors.background,
-                child:
-                Text(
+                backgroundColor: AppColors.surface,
+                child: Text(
                   _name.isNotEmpty ? _name[0].toUpperCase() : "W",
                   style: const TextStyle(
                     fontSize: 40,
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.bold,
+                    color: AppColors.graphite,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
@@ -222,20 +217,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _name,
                 style: const TextStyle(
                   fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.graphite,
                 ),
               ),
 
               const SizedBox(height: 8),
 
-              Text(_email,
-                  style: const TextStyle(color: AppColors.textSecondary)),
+              Text(
+                _email,
+                style: const TextStyle(color: AppColors.textSecondary),
+              ),
 
               const SizedBox(height: 8),
 
-              Text(_phone,
-                  style: const TextStyle(color: AppColors.textSecondary)),
+              Text(
+                _phone,
+                style: const TextStyle(color: AppColors.textSecondary),
+              ),
             ],
           ),
         ),
@@ -259,11 +258,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         const SizedBox(height: 12),
 
-        _buildActionTile(
-          icon: Icons.logout,
-          title: "Logout",
-          onTap: _logout,
-        ),
+        _buildActionTile(icon: Icons.logout, title: "Logout", onTap: _logout),
       ],
     );
   }
@@ -275,12 +270,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required VoidCallback onTap,
     bool isDestructive = false,
   }) {
-    return ListTile(
-      onTap: onTap,
-      leading: Icon(icon,
-          color: isDestructive ? AppColors.error : AppColors.primary),
-      title: Text(title),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: AppColors.aluminiumGradient,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.white, width: 1.2),
+      ),
+      child: ListTile(
+        onTap: onTap,
+        leading: Icon(
+          icon,
+          color: isDestructive ? AppColors.error : AppColors.walnut,
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            color: isDestructive ? AppColors.error : AppColors.graphite,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      ),
     );
   }
 }

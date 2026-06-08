@@ -117,108 +117,134 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          child: Form(
-            key: _formKey,
-            child: Column(
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            Row(
               children: [
-                Container(
-                  width: 200,
-                  height: 200,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppColors.secondary.withAlpha(10),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Image.asset("assets/logo.png"),
+                IconButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    );
+                  },
+                  icon: const Icon(Icons.arrow_back_rounded),
                 ),
-
                 const Text(
-                  'Create Account',
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                  "Build Profile",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
                 ),
-
-                const SizedBox(height: 40),
-
-                CustomTextField(
-                  controller: _nameController,
-                  hintText: 'Full Name',
-                  prefixIcon: Icons.person_outline,
-                  validator: (v) =>
-                      v == null || v.isEmpty ? 'Enter name' : null,
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: AppColors.studioGradient,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: Colors.white, width: 1.2),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.08),
+                    blurRadius: 22,
+                    offset: const Offset(0, 12),
+                  ),
+                ],
+              ),
+              child: const Text(
+                "Tell us who is designing the next beautiful space.",
+                style: TextStyle(
+                  color: AppColors.graphite,
+                  fontSize: 26,
+                  height: 1.1,
+                  fontWeight: FontWeight.w900,
                 ),
-
-                const SizedBox(height: 20),
-
-                CustomTextField(
-                  controller: _emailController,
-                  hintText: 'Email',
-                  keyboardType: TextInputType.emailAddress,
-                  prefixIcon: Icons.email_outlined,
-                  validator: (value) {
-                    final RegExp emailRegex = RegExp(
-                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                    );
-                    if (value == null) {
-                      return 'Enter a  email address';
-                    } else if (!emailRegex.hasMatch(value)) {
-                      return 'Enter a valid email address';
-                    }
-                    return null; // Input is valid
-                  },
-                ),
-
-                const SizedBox(height: 20),
-
-                CustomTextField(
-                  controller: _phoneController,
-                  hintText: 'Phone',
-                  keyboardType: TextInputType.phone,
-                  prefixIcon: Icons.phone_outlined,
-                  validator: (value) {
-                    final RegExp phoneRegex = RegExp(
-                      r'^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$',
-                    );
-                    if (value == null) {
-                      return 'Enter a phone number';
-                    } else if (!phoneRegex.hasMatch(value)) {
-                      return 'Enter a valid phone number';
-                    }
-                    return null; // Input is valid
-                  },
-                ),
-
-                const SizedBox(height: 20),
-
-                CustomTextField(
-                  controller: _passwordController,
-                  // obscureText: _isObscure,
-                  hintText: 'Password',
-                  prefixIcon: Icons.lock_outline,
-                  isPassword: true,
-                  validator: (v) {
-                    if (v == null || v.isEmpty) return 'Enter password';
-                    if (v.length < 6) return 'Min 6 chars';
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 40),
-
-                CustomButton(
-                  text: 'REGISTER',
-                  onPressed: Adddata,
-                  isLoading: _isLoading,
-                ),
-
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              ),
+            ),
+            const SizedBox(height: 18),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: AppColors.aluminiumGradient,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: Colors.white, width: 1.2),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.07),
+                    blurRadius: 24,
+                    offset: const Offset(0, 14),
+                  ),
+                ],
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
                   children: [
-                    const Text("Already have an account?"),
+                    CustomTextField(
+                      controller: _nameController,
+                      hintText: 'Full Name',
+                      prefixIcon: Icons.person_outline,
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Enter name' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    CustomTextField(
+                      controller: _emailController,
+                      hintText: 'Email',
+                      keyboardType: TextInputType.emailAddress,
+                      prefixIcon: Icons.email_outlined,
+                      validator: (value) {
+                        final RegExp emailRegex = RegExp(
+                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        );
+                        if (value == null) {
+                          return 'Enter a  email address';
+                        } else if (!emailRegex.hasMatch(value)) {
+                          return 'Enter a valid email address';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    CustomTextField(
+                      controller: _phoneController,
+                      hintText: 'Phone',
+                      keyboardType: TextInputType.phone,
+                      prefixIcon: Icons.phone_outlined,
+                      validator: (value) {
+                        final RegExp phoneRegex = RegExp(
+                          r'^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$',
+                        );
+                        if (value == null) {
+                          return 'Enter a phone number';
+                        } else if (!phoneRegex.hasMatch(value)) {
+                          return 'Enter a valid phone number';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    CustomTextField(
+                      controller: _passwordController,
+                      hintText: 'Password',
+                      prefixIcon: Icons.lock_outline,
+                      isPassword: true,
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Enter password';
+                        if (v.length < 6) return 'Min 6 chars';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 26),
+                    CustomButton(
+                      text: 'REGISTER',
+                      onPressed: Adddata,
+                      isLoading: _isLoading,
+                    ),
+                    const SizedBox(height: 14),
                     TextButton(
                       onPressed: () {
                         Navigator.pushReplacement(
@@ -228,13 +254,13 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                         );
                       },
-                      child: const Text("Login"),
+                      child: const Text("Already have an account? Login"),
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

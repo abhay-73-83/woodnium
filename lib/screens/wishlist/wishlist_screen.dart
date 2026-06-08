@@ -49,6 +49,23 @@ class WishlistScreenState extends State<WishlistScreen> {
     print("Wishlist Reloaded");
   }
 
+  Future<void> removeWishlist(Product item) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String userId = sp.getString("id") ?? "";
+
+    final res = await ApiService().toggleWishlist(userId, item.id);
+    await loadWishlist();
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          res == "delete" ? "Removed from Wishlist" : "Wishlist update failed",
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -92,24 +109,16 @@ class WishlistScreenState extends State<WishlistScreen> {
         itemBuilder: (context, index) {
           Product item = wishlist[index];
 
-        return ProductCard(
-          product: item,
-          isWishlisted: true, // Always true in wishlist
-          onWishlistTap: () {
-            setState(() {
-              wishlist.removeWhere((p) => p.id == item.id);
-            });
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Removed from Wishlist")),
-              );
-            }
-          },
-          onCardTap: () {
-            loadWishlist(); // refresh if changed inside details
-          },
-        );
-      },
-    ));
+          return ProductCard(
+            product: item,
+            isWishlisted: true, // Always true in wishlist
+            onWishlistTap: () => removeWishlist(item),
+            onCardTap: () {
+              loadWishlist(); // refresh if changed inside details
+            },
+          );
+        },
+      ),
+    );
   }
 }

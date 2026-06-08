@@ -24,7 +24,9 @@ class _WoodNiumAppState extends State<WoodNiumApp> {
   void initState() {
     super.initState();
     _checkInitialConnection();
-    _connectivityService.connectionStatusController.stream.listen((isConnected) {
+    _connectivityService.connectionStatusController.stream.listen((
+      isConnected,
+    ) {
       if (mounted) {
         setState(() => _isConnected = isConnected);
       }
@@ -57,9 +59,7 @@ class _WoodNiumAppState extends State<WoodNiumApp> {
             ?child,
             if (!_isConnected)
               Positioned.fill(
-                child: NoInternetScreen(
-                  onRetry: _checkInitialConnection,
-                ),
+                child: NoInternetScreen(onRetry: _checkInitialConnection),
               ),
           ],
         );
